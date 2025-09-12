@@ -1440,11 +1440,11 @@
 
         function getOriginalText(score) {
             switch(score) {
-                case 3: return 'P';
-                case 2: return 'S';
-                case 1: return 'T';
-                case -1: return '?';
-                default: return '-';
+                case 3: return 'Primary';
+                case 2: return 'Secondary';
+                case 1: return 'Tertiary';
+                case -1: return 'Pending';
+                default: return 'None';
             }
         }
 
