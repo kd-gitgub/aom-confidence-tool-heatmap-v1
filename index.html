@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Tool Inventory Heatmap - With Confidence Levels</title>
+    <title>Analytics Tool Inventory Heatmap - With Pending Status</title>
     <style>
         * {
             margin: 0;
@@ -252,7 +252,7 @@
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             margin: 15px 0;
         }
@@ -279,7 +279,7 @@
         .legend {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 25px;
             margin: 10px 0;
             padding: 15px;
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
@@ -311,6 +311,15 @@
         .primary { background: #8f29fc; }
         .secondary { background: #c77cd8; }
         .tertiary { background: #d3cad9; }
+        .pending { 
+            background: repeating-linear-gradient(
+                45deg,
+                #ffd700,
+                #ffd700 4px,
+                #ffed8a 4px,
+                #ffed8a 8px
+            );
+        }
         .none { background: linear-gradient(135deg, #f8f9fa, #e9ecef); }
 
         .heatmap-container {
@@ -544,6 +553,19 @@
             color: #2c3e50;
         }
 
+        .pending-cell {
+            background: repeating-linear-gradient(
+                45deg,
+                #ffd700,
+                #ffd700 4px,
+                #ffed8a 4px,
+                #ffed8a 8px
+            );
+            color: #2c3e50;
+            font-weight: bold;
+            font-style: italic;
+        }
+
         .none-cell {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             color: #6c757d;
@@ -775,6 +797,10 @@
                 margin-right: 0;
                 margin-bottom: 8px;
             }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -842,8 +868,12 @@
                 <div class="stat-label">Level 2 Capabilities</div>
             </div>
             <div class="stat-card">
+                <div class="stat-number" id="pending-count">0</div>
+                <div class="stat-label">Pending Evaluations</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-number" id="high-potential-count">0</div>
-                <div class="stat-label">Tools with High Rationalisation Potential</div>
+                <div class="stat-label">High Rationalisation Potential</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="reduction-potential">0%</div>
@@ -875,7 +905,7 @@
                     <label class="contrast-slider-label">Contrast:</label>
                     <div class="slider-wrapper">
                         <span class="slider-side-label">High</span>
-                        <input type="range" min="0" max="3" value="3" class="contrast-slider" id="contrastSlider">
+                        <input type="range" min="0" max="4" value="4" class="contrast-slider" id="contrastSlider">
                         <span class="slider-side-label">Low</span>
                     </div>
                 </div>
@@ -894,6 +924,10 @@
             <div class="legend-item">
                 <div class="legend-color tertiary"></div>
                 <span>T - Tertiary: Basic capability</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color pending"></div>
+                <span>? - Pending: Not yet evaluated</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color none"></div>
@@ -951,7 +985,7 @@
         let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let showUnusedTools = false;
         let selectedConfidenceLevels = ['H', 'M', 'L'];
-        let contrastLevel = 3; // 0=P only, 1=P&S, 2=P,S&T, 3=All
+        let contrastLevel = 4; // 0=P only, 1=P&S, 2=P,S&T, 3=All except pending, 4=All including pending
 
         // Load data from GitHub on page load
         async function loadDataFromGitHub() {
@@ -1110,10 +1144,15 @@
         }
 
         function parseScoreAndConfidence(cellValue) {
-            const value = String(cellValue || '0').trim();
+            const value = String(cellValue || '').trim();
             
             let score = 0;
             let confidence = '';
+            
+            // Check for pending marker first
+            if (value === '-1' || value.toLowerCase() === 'pending' || value === '?' || value.toLowerCase() === 'p?' || value === '4') {
+                return { score: -1, confidence: 'P' }; // P for pending
+            }
             
             if (value === '0' || value === '') {
                 return { score: 0, confidence: '' };
@@ -1130,7 +1169,7 @@
             }
             
             // Validate confidence values
-            if (confidence && !['H', 'M', 'L'].includes(confidence)) {
+            if (confidence && !['H', 'M', 'L', 'P'].includes(confidence)) {
                 confidence = 'M'; // Default to medium if invalid
             }
             
@@ -1226,6 +1265,7 @@
                 // Update stats for no tools
                 document.getElementById('tools-count').textContent = '0';
                 document.getElementById('capabilities-count').textContent = capabilities.length;
+                document.getElementById('pending-count').textContent = '0';
                 document.getElementById('high-potential-count').textContent = '0';
                 document.getElementById('reduction-potential').textContent = '0%';
                 return;
@@ -1303,6 +1343,10 @@
                             cell.classList.add('tertiary-cell');
                             cell.textContent = 'T';
                             break;
+                        case -1:
+                            cell.classList.add('pending-cell');
+                            cell.textContent = '?';
+                            break;
                         default:
                             cell.classList.add('none-cell');
                             cell.textContent = '-';
@@ -1342,6 +1386,9 @@
                     if (!selectedConfidenceLevels.includes('L')) {
                         cell.dataset.confidenceHidden = 'true';
                     }
+                } else if (score === -1) {
+                    // Pending cells are always shown regardless of confidence filter
+                    cell.dataset.confidenceHidden = 'false';
                 } else {
                     // For cells with scores, check if their confidence level is selected
                     if (!selectedConfidenceLevels.includes(confidence)) {
@@ -1371,7 +1418,10 @@
                     case 2: // P, S & T
                         contrastHidden = score < 1;
                         break;
-                    case 3: // All
+                    case 3: // All except pending
+                        contrastHidden = score === -1;
+                        break;
+                    case 4: // All including pending
                     default:
                         contrastHidden = false;
                         break;
@@ -1393,6 +1443,7 @@
                 case 3: return 'P';
                 case 2: return 'S';
                 case 1: return 'T';
+                case -1: return '?';
                 default: return '-';
             }
         }
@@ -1465,6 +1516,18 @@
             document.getElementById('tools-count').textContent = filteredTools.length;
             document.getElementById('capabilities-count').textContent = capabilities.length;
             
+            // Count pending evaluations
+            let pendingCount = 0;
+            filteredTools.forEach(row => {
+                for (let i = 1; i <= capabilities.length; i++) {
+                    const cellValue = row[`Cap${i}`];
+                    const { score } = parseScoreAndConfidence(cellValue);
+                    if (score === -1) pendingCount++;
+                }
+            });
+            document.getElementById('pending-count').textContent = pendingCount;
+            
+            // Count high potential tools (those with 3+ primary capabilities)
             const highPotentialCount = filteredTools.filter(row => {
                 let highScores = 0;
                 for (let i = 1; i <= capabilities.length; i++) {
@@ -1524,7 +1587,7 @@
                 applyAllFilters();
             });
 
-            // Contrast slider event listeners
+            // Contrast slider event listeners - updated range
             const contrastSlider = document.getElementById('contrastSlider');
             contrastSlider.addEventListener('input', (e) => {
                 contrastLevel = parseInt(e.target.value);
