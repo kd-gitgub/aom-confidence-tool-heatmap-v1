@@ -69,12 +69,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes pulse-warning {
-            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-            50% { box-shadow: 0 0 0 5px rgba(255, 0, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-        }
-
         .error-message {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
@@ -118,7 +112,7 @@
             align-items: center;
         }
 
-        .region-checkbox, .confidence-option {
+        .region-checkbox, .confidence-checkbox {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -131,19 +125,19 @@
             font-weight: 500;
         }
 
-        .region-checkbox:hover, .confidence-option:hover {
+        .region-checkbox:hover, .confidence-checkbox:hover {
             border-color: #0079FF;
             background: #f0f7ff;
         }
 
-        .region-checkbox input[type="checkbox"], .confidence-option input[type="radio"] {
+        .region-checkbox input[type="checkbox"], .confidence-checkbox input[type="checkbox"] {
             width: 16px;
             height: 16px;
             accent-color: #0079FF;
             cursor: pointer;
         }
 
-        .region-checkbox.selected, .confidence-option.selected {
+        .region-checkbox.selected, .confidence-checkbox.selected {
             border-color: #0079FF;
             background: #0079FF;
             color: white;
@@ -456,7 +450,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-sizing: border-box;
         }
 
         .capability-cell:hover {
@@ -771,28 +764,6 @@
             </div>
         </div>
 
-        <div class="confidence-filter">
-            <h3>Confidence Display</h3>
-            <div class="filter-controls">
-                <label class="confidence-option">
-                    <input type="radio" name="confidence-mode" value="all" checked>
-                    <span>Show All</span>
-                </label>
-                <label class="confidence-option">
-                    <input type="radio" name="confidence-mode" value="high-only">
-                    <span>High Confidence Only</span>
-                </label>
-                <label class="confidence-option">
-                    <input type="radio" name="confidence-mode" value="hide-low">
-                    <span>Hide Low Confidence</span>
-                </label>
-                <label class="confidence-option">
-                    <input type="radio" name="confidence-mode" value="highlight-low">
-                    <span>Flag weak data</span>
-                </label>
-            </div>
-        </div>
-
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number" id="tools-count">0</div>
@@ -809,6 +780,27 @@
             <div class="stat-card">
                 <div class="stat-number" id="reduction-potential">0%</div>
                 <div class="stat-label">Potential Tool Reduction</div>
+            </div>
+        </div>
+
+        <div class="confidence-filter">
+            <div class="filter-controls">
+                <label class="confidence-checkbox selected" id="conf-high-label">
+                    <input type="checkbox" id="conf-high" value="H" checked>
+                    <span>High Confidence</span>
+                </label>
+                <label class="confidence-checkbox selected" id="conf-medium-label">
+                    <input type="checkbox" id="conf-medium" value="M" checked>
+                    <span>Medium Confidence</span>
+                </label>
+                <label class="confidence-checkbox selected" id="conf-low-label">
+                    <input type="checkbox" id="conf-low" value="L" checked>
+                    <span>Weak or no data</span>
+                </label>
+                <div class="filter-actions">
+                    <button class="filter-btn" id="conf-select-all">Select All</button>
+                    <button class="filter-btn" id="conf-clear-all">Clear All</button>
+                </div>
             </div>
         </div>
 
@@ -880,7 +872,7 @@
         let selectedRegions = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let showUnusedTools = false;
-        let currentConfidenceMode = 'all';
+        let selectedConfidenceLevels = ['H', 'M', 'L'];
 
         // Load data from GitHub on page load
         async function loadDataFromGitHub() {
@@ -1236,36 +1228,19 @@
                             cell.classList.add('none-cell');
                             cell.textContent = '-';
                     }
-                    
-                    // Apply confidence styling (only for scores 1-3)
-                    if (score > 0 && confidence) {
-                        switch(confidence) {
-                            case 'H':
-                                cell.style.border = '2px solid #001c66';
-                                break;
-                            case 'M':
-                                cell.style.border = '2px dashed #666';
-                                break;
-                            case 'L':
-                                cell.style.border = '2px dotted #999';
-                                cell.style.opacity = '0.85';
-                                break;
-                        }
-                    }
 
                     heatmap.appendChild(cell);
                 });
             });
 
-            // Apply current confidence filter
-            applyConfidenceFilter(currentConfidenceMode);
+            // Apply confidence filter
+            applyConfidenceFilter();
 
             // Update stats
             updateStats(filteredTools);
         }
 
-        function applyConfidenceFilter(mode) {
-            currentConfidenceMode = mode;
+        function applyConfidenceFilter() {
             const cells = document.querySelectorAll('.capability-cell');
             
             cells.forEach(cell => {
@@ -1275,58 +1250,26 @@
                 // Reset styles
                 cell.style.opacity = '';
                 cell.style.visibility = '';
-                cell.style.animation = '';
                 const originalText = getOriginalText(score);
                 
-                // Only apply filters to cells with scores (not "None" cells)
-                if (score > 0) {
-                    switch(mode) {
-                        case 'high-only':
-                            if (confidence !== 'H') {
-                                cell.style.opacity = '0.2';
-                                cell.textContent = '';
-                            } else {
-                                cell.style.opacity = '';
-                                cell.textContent = originalText;
-                            }
-                            break;
-                            
-                        case 'hide-low':
-                            if (confidence === 'L') {
-                                cell.style.opacity = '0.1';
-                                cell.textContent = '';
-                            } else {
-                                cell.style.opacity = '';
-                                cell.textContent = originalText;
-                            }
-                            break;
-                            
-                        case 'highlight-low':
-                            if (confidence === 'L') {
-                                cell.style.animation = 'pulse-warning 2s infinite';
-                            }
-                            cell.textContent = originalText;
-                            break;
-                            
-                        case 'all':
-                        default:
-                            // Reset to original state
-                            if (score > 0 && confidence === 'L') {
-                                cell.style.opacity = '0.85';
-                            }
-                            cell.textContent = originalText;
-                            break;
+                // For cells with no score (0), treat them as low confidence if "Weak or no data" is not selected
+                if (score === 0) {
+                    if (!selectedConfidenceLevels.includes('L')) {
+                        cell.style.opacity = '0.1';
+                        cell.textContent = '';
+                    } else {
+                        cell.style.opacity = '';
+                        cell.textContent = originalText;
                     }
-                }
-            });
-            
-            // Update confidence radio button styling
-            document.querySelectorAll('.confidence-option').forEach(label => {
-                const radio = label.querySelector('input[type="radio"]');
-                if (radio.value === mode) {
-                    label.classList.add('selected');
                 } else {
-                    label.classList.remove('selected');
+                    // For cells with scores, check if their confidence level is selected
+                    if (!selectedConfidenceLevels.includes(confidence)) {
+                        cell.style.opacity = '0.1';
+                        cell.textContent = '';
+                    } else {
+                        cell.style.opacity = '';
+                        cell.textContent = originalText;
+                    }
                 }
             });
         }
@@ -1451,10 +1394,20 @@
             });
 
             // Confidence filter event listeners
-            document.querySelectorAll('input[name="confidence-mode"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    applyConfidenceFilter(e.target.value);
-                });
+            document.querySelectorAll('.confidence-checkbox input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', handleConfidenceChange);
+            });
+
+            document.getElementById('conf-select-all').addEventListener('click', () => {
+                selectedConfidenceLevels = ['H', 'M', 'L'];
+                updateConfidenceCheckboxes();
+                applyConfidenceFilter();
+            });
+
+            document.getElementById('conf-clear-all').addEventListener('click', () => {
+                selectedConfidenceLevels = [];
+                updateConfidenceCheckboxes();
+                applyConfidenceFilter();
             });
 
             // Refresh button
@@ -1500,6 +1453,20 @@
             updateHeatmap();
         }
 
+        function handleConfidenceChange() {
+            const checkboxes = document.querySelectorAll('.confidence-checkbox input[type="checkbox"]');
+            selectedConfidenceLevels = [];
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedConfidenceLevels.push(cb.value);
+                }
+            });
+
+            updateConfidenceCheckboxes();
+            applyConfidenceFilter();
+        }
+
         function updateRegionCheckboxes() {
             document.querySelectorAll('.region-checkbox').forEach(label => {
                 const checkbox = label.querySelector('input');
@@ -1520,6 +1487,20 @@
                         label.classList.remove('selected');
                         checkbox.checked = false;
                     }
+                }
+            });
+        }
+
+        function updateConfidenceCheckboxes() {
+            document.querySelectorAll('.confidence-checkbox').forEach(label => {
+                const checkbox = label.querySelector('input');
+                
+                if (selectedConfidenceLevels.includes(checkbox.value)) {
+                    label.classList.add('selected');
+                    checkbox.checked = true;
+                } else {
+                    label.classList.remove('selected');
+                    checkbox.checked = false;
                 }
             });
         }
