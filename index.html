@@ -164,6 +164,74 @@
             color: white;
         }
 
+        /* Compact contrast slider styles */
+        .contrast-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #dadce0;
+        }
+
+        .contrast-slider-label {
+            color: #0A142D;
+            font-weight: 600;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-side-label {
+            color: #495057;
+            font-size: 0.85em;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .contrast-slider {
+            width: 120px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #001C66;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .contrast-slider:hover {
+            opacity: 1;
+        }
+
+        .contrast-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0079FF;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .contrast-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0079FF;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
         .header {
             text-align: center;
             margin-bottom: 15px;
@@ -801,6 +869,16 @@
                     <button class="filter-btn" id="conf-select-all">Select All</button>
                     <button class="filter-btn" id="conf-clear-all">Clear All</button>
                 </div>
+                
+                <!-- Compact contrast slider moved to same line -->
+                <div class="contrast-slider-container">
+                    <label class="contrast-slider-label">Contrast:</label>
+                    <div class="slider-wrapper">
+                        <span class="slider-side-label">High</span>
+                        <input type="range" min="0" max="3" value="3" class="contrast-slider" id="contrastSlider">
+                        <span class="slider-side-label">Low</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -873,6 +951,7 @@
         let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let showUnusedTools = false;
         let selectedConfidenceLevels = ['H', 'M', 'L'];
+        let contrastLevel = 3; // 0=P only, 1=P&S, 2=P,S&T, 3=All
 
         // Load data from GitHub on page load
         async function loadDataFromGitHub() {
@@ -1233,11 +1312,16 @@
                 });
             });
 
-            // Apply confidence filter
-            applyConfidenceFilter();
+            // Apply filters
+            applyAllFilters();
 
             // Update stats
             updateStats(filteredTools);
+        }
+
+        function applyAllFilters() {
+            applyConfidenceFilter();
+            applyContrastFilter();
         }
 
         function applyConfidenceFilter() {
@@ -1250,26 +1334,56 @@
                 // Reset styles
                 cell.style.opacity = '';
                 cell.style.visibility = '';
+                cell.dataset.confidenceHidden = 'false';
                 const originalText = getOriginalText(score);
                 
                 // For cells with no score (0), treat them as low confidence if "Weak or no data" is not selected
                 if (score === 0) {
                     if (!selectedConfidenceLevels.includes('L')) {
-                        cell.style.opacity = '0.1';
-                        cell.textContent = '';
-                    } else {
-                        cell.style.opacity = '';
-                        cell.textContent = originalText;
+                        cell.dataset.confidenceHidden = 'true';
                     }
                 } else {
                     // For cells with scores, check if their confidence level is selected
                     if (!selectedConfidenceLevels.includes(confidence)) {
-                        cell.style.opacity = '0.1';
-                        cell.textContent = '';
-                    } else {
-                        cell.style.opacity = '';
-                        cell.textContent = originalText;
+                        cell.dataset.confidenceHidden = 'true';
                     }
+                }
+            });
+        }
+
+        function applyContrastFilter() {
+            const cells = document.querySelectorAll('.capability-cell');
+            
+            cells.forEach(cell => {
+                const score = parseInt(cell.dataset.score);
+                const confidenceHidden = cell.dataset.confidenceHidden === 'true';
+                const originalText = getOriginalText(score);
+                
+                // Apply contrast filter based on score
+                let contrastHidden = false;
+                switch(contrastLevel) {
+                    case 0: // P only
+                        contrastHidden = score !== 3;
+                        break;
+                    case 1: // P & S
+                        contrastHidden = score < 2;
+                        break;
+                    case 2: // P, S & T
+                        contrastHidden = score < 1;
+                        break;
+                    case 3: // All
+                    default:
+                        contrastHidden = false;
+                        break;
+                }
+                
+                // Apply combined filter effect
+                if (confidenceHidden || contrastHidden) {
+                    cell.style.opacity = '0.1';
+                    cell.textContent = '';
+                } else {
+                    cell.style.opacity = '';
+                    cell.textContent = originalText;
                 }
             });
         }
@@ -1401,13 +1515,20 @@
             document.getElementById('conf-select-all').addEventListener('click', () => {
                 selectedConfidenceLevels = ['H', 'M', 'L'];
                 updateConfidenceCheckboxes();
-                applyConfidenceFilter();
+                applyAllFilters();
             });
 
             document.getElementById('conf-clear-all').addEventListener('click', () => {
                 selectedConfidenceLevels = [];
                 updateConfidenceCheckboxes();
-                applyConfidenceFilter();
+                applyAllFilters();
+            });
+
+            // Contrast slider event listeners
+            const contrastSlider = document.getElementById('contrastSlider');
+            contrastSlider.addEventListener('input', (e) => {
+                contrastLevel = parseInt(e.target.value);
+                applyContrastFilter();
             });
 
             // Refresh button
@@ -1464,7 +1585,7 @@
             });
 
             updateConfidenceCheckboxes();
-            applyConfidenceFilter();
+            applyAllFilters();
         }
 
         function updateRegionCheckboxes() {
