@@ -1345,7 +1345,7 @@
                             break;
                         case -1:
                             cell.classList.add('pending-cell');
-                            cell.textContent = '?';
+                            cell.textContent = 'Pending';
                             break;
                         default:
                             cell.classList.add('none-cell');
@@ -1433,7 +1433,12 @@
                     cell.textContent = '';
                 } else {
                     cell.style.opacity = '';
-                    cell.textContent = originalText;
+                    // Keep consistent display format
+                    if (score === -1) {
+                        cell.textContent = 'Pending';
+                    } else {
+                        cell.textContent = originalText;
+                    }
                 }
             });
         }
