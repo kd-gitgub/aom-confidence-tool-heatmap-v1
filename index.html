@@ -1333,15 +1333,15 @@
                     switch(score) {
                         case 3:
                             cell.classList.add('primary-cell');
-                            cell.textContent = 'P';
+                            cell.textContent = 'Primary';
                             break;
                         case 2:
                             cell.classList.add('secondary-cell');
-                            cell.textContent = 'S';
+                            cell.textContent = 'Secondary';
                             break;
                         case 1:
                             cell.classList.add('tertiary-cell');
-                            cell.textContent = 'T';
+                            cell.textContent = 'Tertiary';
                             break;
                         case -1:
                             cell.classList.add('pending-cell');
@@ -1349,7 +1349,7 @@
                             break;
                         default:
                             cell.classList.add('none-cell');
-                            cell.textContent = '-';
+                            cell.textContent = 'None';
                     }
 
                     heatmap.appendChild(cell);
