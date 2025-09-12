@@ -223,25 +223,12 @@
         .legend {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 20px;
+            gap: 30px;
             margin: 10px 0;
             padding: 15px;
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-radius: 8px;
             border: 1px solid #dee2e6;
-        }
-
-        .legend-section {
-            display: flex;
-            gap: 20px;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .legend-divider {
-            border-left: 2px solid #dee2e6;
-            margin: 0 10px;
         }
 
         .legend-item {
@@ -269,25 +256,6 @@
         .secondary { background: #c77cd8; }
         .tertiary { background: #d3cad9; }
         .none { background: linear-gradient(135deg, #f8f9fa, #e9ecef); }
-
-        .confidence-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-            box-sizing: border-box;
-        }
-
-        .confidence-high {
-            border: 2px solid #001c66;
-        }
-
-        .confidence-medium {
-            border: 2px dashed #666;
-        }
-
-        .confidence-low {
-            border: 2px dotted #999;
-        }
 
         .heatmap-container {
             overflow: auto;
@@ -826,7 +794,7 @@
                 </label>
                 <label class="confidence-option">
                     <input type="radio" name="confidence-mode" value="highlight-low">
-                    <span>Highlight Uncertain</span>
+                    <span>Flag weak data</span>
                 </label>
             </div>
         </div>
@@ -851,38 +819,21 @@
         </div>
 
         <div class="legend">
-            <div class="legend-section">
-                <div class="legend-item">
-                    <div class="legend-color primary"></div>
-                    <span>Primary (3)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color secondary"></div>
-                    <span>Secondary (2)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color tertiary"></div>
-                    <span>Tertiary (1)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color none"></div>
-                    <span>None (0)</span>
-                </div>
+            <div class="legend-item">
+                <div class="legend-color primary"></div>
+                <span>P - Primary: Core purpose/strength</span>
             </div>
-            <div class="legend-divider"></div>
-            <div class="legend-section">
-                <div class="legend-item">
-                    <div class="confidence-indicator confidence-high"></div>
-                    <span>High Conf</span>
-                </div>
-                <div class="legend-item">
-                    <div class="confidence-indicator confidence-medium"></div>
-                    <span>Med Conf</span>
-                </div>
-                <div class="legend-item">
-                    <div class="confidence-indicator confidence-low"></div>
-                    <span>Low Conf</span>
-                </div>
+            <div class="legend-item">
+                <div class="legend-color secondary"></div>
+                <span>S - Secondary: Strong support</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color tertiary"></div>
+                <span>T - Tertiary: Basic capability</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color none"></div>
+                <span>N - None: No capability</span>
             </div>
         </div>
 
