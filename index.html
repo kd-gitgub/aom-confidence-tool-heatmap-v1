@@ -1016,7 +1016,7 @@
             const parsed = Papa.parse(csvContent, {
                 header: true,
                 skipEmptyLines: true,
-                dynamicTyping: false
+                dynamicTyping: false  // Keep as strings to preserve -1 format
             });
 
             const allRows = parsed.data;
