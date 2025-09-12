@@ -301,19 +301,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .primary { background: #8f29fc; }
-        .secondary { background: #c77cd8; }
-        .tertiary { background: #d3cad9; }
-        .pending { 
-            background: repeating-linear-gradient(
-                45deg,
-                #ffeb99,
-                #ffeb99 4px,
-                #fff4cc 4px,
-                #fff4cc 8px
-            );
+        .legend-color.primary { background: #8f29fc !important; }
+        .legend-color.secondary { background: #b876f7 !important; }
+        .legend-color.tertiary { background: #dcc4f5 !important; }
+        .legend-color.pending { 
+            background: white !important; 
+            border: 1px solid #dee2e6 !important;
         }
-        .none { background: linear-gradient(135deg, #f8f9fa, #e9ecef); }
+        .legend-color.none { background: #f3ebfc !important; }
 
         .heatmap-container {
             overflow: auto;
@@ -533,37 +528,32 @@
         }
 
         .primary-cell {
-            background: #8f29fc;
+            background: #8f29fc !important;
             color: white;
             font-weight: bold;
         }
 
         .secondary-cell {
-            background: #c77cd8;
+            background: #b876f7 !important;
             color: white;
             font-weight: bold;
         }
 
         .tertiary-cell {
-            background: #d3cad9;
+            background: #dcc4f5 !important;
             color: #001C66;
         }
 
         .pending-cell {
-            background: repeating-linear-gradient(
-                45deg,
-                #ffeb99,
-                #ffeb99 4px,
-                #fff4cc 4px,
-                #fff4cc 8px
-            ) !important;
+            background: white !important;
             color: #001C66 !important;
             font-weight: normal !important;
             font-style: normal !important;
+            border: 1px solid #e1e8ed;
         }
 
         .none-cell {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            background: #f3ebfc !important;
             color: #001C66;
         }
 
@@ -922,7 +912,7 @@
             </div>
             <div class="legend-item">
                 <div class="legend-color none"></div>
-                <span>None (no capability)</span>
+                <span>No capability</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color pending"></div>
@@ -1331,7 +1321,7 @@
                             break;
                         default:
                             cell.classList.add('none-cell');
-                            cell.textContent = 'None';
+                            cell.textContent = 'No capability';
                     }
 
                     heatmap.appendChild(cell);
@@ -1420,7 +1410,7 @@
                 case 2: return 'Secondary';
                 case 1: return 'Tertiary';
                 case -1: return 'Pending';
-                default: return 'None';
+                default: return 'No capability';
             }
         }
 
