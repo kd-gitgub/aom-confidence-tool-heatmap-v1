@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Tool Inventory Heatmap - With Pending Status</title>
+    <title>Analytics Tool Inventory Heatmap</title>
     <style>
         * {
             margin: 0;
@@ -91,12 +91,6 @@
             border: 2px solid #dadce0;
         }
 
-        .region-filter h3 {
-            color: #0A142D;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
         .confidence-filter {
             background: linear-gradient(135deg, #f1f3f4, #e8eaed);
             border-radius: 8px;
@@ -164,7 +158,6 @@
             color: white;
         }
 
-        /* Compact contrast slider styles */
         .contrast-slider-container {
             display: flex;
             align-items: center;
@@ -761,25 +754,6 @@
             box-shadow: 0 6px 20px rgba(0, 121, 255, 0.5);
         }
 
-        .debug-info {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            background: #f8f9fa;
-            border: 2px solid #001c66;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 11px;
-            max-width: 300px;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .debug-info.show {
-            display: block;
-        }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -919,7 +893,6 @@
                     <button class="filter-btn" id="conf-clear-all">Clear All</button>
                 </div>
                 
-                <!-- Compact contrast slider moved to same line -->
                 <div class="contrast-slider-container">
                     <label class="contrast-slider-label">Contrast:</label>
                     <div class="slider-wrapper">
@@ -967,13 +940,6 @@
 
     <button class="refresh-btn" id="refresh-btn" title="Refresh data from GitHub">↻</button>
 
-    <!-- Debug info panel -->
-    <div class="debug-info" id="debug-info">
-        <strong>Debug Info:</strong>
-        <div id="debug-content"></div>
-    </div>
-
-    <!-- Modal -->
     <div class="modal-overlay" id="capabilityModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -990,19 +956,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script>
-        // ============================================
-        // CONFIGURATION - YOUR GITHUB CSV URLS
-        // ============================================
         const GITHUB_CSV_URLS = {
             tools: 'https://raw.githubusercontent.com/kd-gitgub/aom-tool-heatmap-v1/main/tools-data.csv',
             subcapabilities: 'https://raw.githubusercontent.com/kd-gitgub/aom-tool-heatmap-v1/main/subcapabilities-data.csv'
         };
 
-        // ============================================
-        // END CONFIGURATION
-        // ============================================
-
-        // Global variables for storing data
         let toolsData = null;
         let subcapabilitiesData = {};
         let capabilities = [];
@@ -1010,10 +968,8 @@
         let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let showUnusedTools = false;
         let selectedConfidenceLevels = ['H', 'M', 'L'];
-        let contrastLevel = 4; // 0=P only, 1=P&S, 2=P,S&T, 3=All except pending, 4=All including pending
-        let debugMode = false; // Toggle this to true to see debug info
+        let contrastLevel = 4;
 
-        // Load data from GitHub on page load
         async function loadDataFromGitHub() {
             const loading = document.getElementById('loading');
             const errorDiv = document.getElementById('error-message');
@@ -1022,7 +978,6 @@
             errorDiv.classList.remove('show');
 
             try {
-                // Fetch both CSV files from GitHub
                 const [toolsResponse, subcapResponse] = await Promise.all([
                     fetch(GITHUB_CSV_URLS.tools),
                     fetch(GITHUB_CSV_URLS.subcapabilities)
@@ -1035,11 +990,9 @@
                 const toolsContent = await toolsResponse.text();
                 const subcapContent = await subcapResponse.text();
 
-                // Process the data
                 processToolsData(toolsContent);
                 processSubcapabilitiesData(subcapContent);
                 
-                // Initialize the heatmap
                 initializeHeatmap();
                 
                 loading.style.display = 'none';
@@ -1055,7 +1008,6 @@
                 `;
                 errorDiv.classList.add('show');
                 
-                // Show empty heatmap
                 updateHeatmap();
             }
         }
@@ -1064,15 +1016,13 @@
             const parsed = Papa.parse(csvContent, {
                 header: true,
                 skipEmptyLines: true,
-                dynamicTyping: false // Changed to false to keep everything as strings
+                dynamicTyping: false
             });
 
-            // Extract tools and capability names
             const allRows = parsed.data;
             const capabilityNamesRow = allRows.find(row => row.Tool === "CAPABILITY_NAMES");
             const toolRows = allRows.filter(row => row.Tool !== "CAPABILITY_NAMES");
 
-            // Sort capability columns numerically
             const capColumns = Object.keys(parsed.data[0] || {})
                 .filter(col => col.startsWith('Cap'))
                 .sort((a, b) => {
@@ -1081,45 +1031,23 @@
                     return numA - numB;
                 });
 
-            // Extract capabilities and region columns
             capabilities = capColumns.map(col => capabilityNamesRow[col] || `Capability ${col.replace('Cap', '')}`);
             regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
 
-            // Store the tools data
             toolsData = toolRows;
-
-            // Debug: Log sample of data to check for pending values
-            if (debugMode) {
-                console.log('Sample tool data:', toolRows.slice(0, 3));
-                let pendingValues = [];
-                toolRows.forEach(row => {
-                    capColumns.forEach(col => {
-                        const value = row[col];
-                        if (value && (value.toString().toLowerCase().includes('pending') || 
-                                     value.toString().includes('?') || 
-                                     value.toString().includes('-1'))) {
-                            pendingValues.push({ tool: row.Tool, cap: col, value: value });
-                        }
-                    });
-                });
-                console.log('Found pending values:', pendingValues);
-            }
         }
 
         function processSubcapabilitiesData(csvContent) {
             const parsed = Papa.parse(csvContent, {
                 header: true,
                 skipEmptyLines: true,
-                dynamicTyping: false // Changed to false
+                dynamicTyping: false
             });
 
-            // Reset subcapabilities data
             subcapabilitiesData = {};
             
-            // Track counts per capability to auto-fix duplicate IDs
             const capabilityCounts = {};
 
-            // Process each row
             parsed.data.forEach(row => {
                 const capId = parseInt(
                     row.Capability_ID || 
@@ -1179,33 +1107,26 @@
         }
 
         function initializeHeatmap() {
-            // Setup event listeners
             setupEventListeners();
-
-            // Initial render
             updateHeatmap();
         }
 
         function parseScoreAndConfidence(cellValue) {
-            // Enhanced parsing function with better pending detection
             const value = String(cellValue || '').trim();
-            
-            // Debug logging
-            if (debugMode && value && value !== '0') {
-                console.log(`Parsing value: "${value}"`);
-            }
             
             let score = 0;
             let confidence = '';
             
-            // Check for empty or zero values first
             if (value === '' || value === '0' || value === 0) {
                 return { score: 0, confidence: '' };
             }
             
-            // Enhanced pending detection - check various formats
+            // FIXED: Check for -1 specifically (both string and numeric)
+            if (value === '-1' || value === -1 || parseInt(value) === -1) {
+                return { score: -1, confidence: 'P' };
+            }
+            
             const pendingPatterns = [
-                '-1', 
                 'pending', 
                 '?',
                 'p?',
@@ -1221,44 +1142,35 @@
             );
             
             if (isPending) {
-                if (debugMode) {
-                    console.log(`Detected as pending: "${value}"`);
-                }
-                return { score: -1, confidence: 'P' }; // P for pending
+                return { score: -1, confidence: 'P' };
             }
             
-            // Check if it's the new format with confidence (e.g., "3H", "2M", "1L")
             if (value.length >= 2 && isNaN(value)) {
-                // Try to extract number and letter
                 const match = value.match(/^(\d+)([HMLhml])?$/);
                 if (match) {
                     score = parseInt(match[1]);
                     confidence = match[2] ? match[2].toUpperCase() : 'M';
                 } else {
-                    // If it doesn't match the pattern, treat as no capability
                     return { score: 0, confidence: '' };
                 }
             } else if (!isNaN(value)) {
-                // Legacy format - just a number
                 score = parseInt(value);
-                // Only treat 1-3 as valid scores, anything else as no capability
+                // FIXED: Check for -1 again after parsing
+                if (score === -1) {
+                    return { score: -1, confidence: 'P' };
+                }
                 if (score >= 1 && score <= 3) {
-                    confidence = 'M'; // Default to medium confidence for legacy data
+                    confidence = 'M';
                 } else {
-                    score = 0; // Invalid score, treat as no capability
+                    score = 0;
                     confidence = '';
                 }
             } else {
-                // Unrecognized format
-                if (debugMode) {
-                    console.log(`Unrecognized format: "${value}"`);
-                }
                 return { score: 0, confidence: '' };
             }
             
-            // Validate confidence values
             if (confidence && !['H', 'M', 'L', 'P'].includes(confidence)) {
-                confidence = 'M'; // Default to medium if invalid
+                confidence = 'M';
             }
             
             return { score, confidence };
@@ -1268,20 +1180,16 @@
             const heatmap = document.getElementById('heatmap');
             heatmap.innerHTML = '';
 
-            // Check if data is loaded
             if (!toolsData || toolsData.length === 0 || capabilities.length === 0) {
                 heatmap.className = 'heatmap empty';
                 heatmap.innerHTML = '<div style="text-align: center; padding: 40px;">Loading data from GitHub...</div>';
                 return;
             }
 
-            // Always set up the grid structure
             heatmap.className = 'heatmap';
             heatmap.style.gridTemplateColumns = `320px 100px repeat(${capabilities.length}, minmax(100px, 1fr))`;
             heatmap.style.minWidth = `${320 + 100 + (capabilities.length * 100)}px`;
 
-            // Always render headers
-            // Corner cell
             const cornerCell = document.createElement('div');
             cornerCell.className = 'header-cell corner-cell';
             cornerCell.textContent = 'ANALYTICS TOOLS';
@@ -1291,14 +1199,12 @@
             cornerCell.style.paddingRight = '25px';
             heatmap.appendChild(cornerCell);
 
-            // TIME Status header - NOW WITH CLICK EVENT
             const timeHeaderCell = document.createElement('div');
             timeHeaderCell.className = 'time-header-cell';
             timeHeaderCell.innerHTML = '<div><strong>TIME</strong><br>Status</div>';
             timeHeaderCell.addEventListener('click', showTimeStatusModal);
             heatmap.appendChild(timeHeaderCell);
 
-            // Capability headers - ALWAYS RENDERED
             capabilities.forEach((capability, index) => {
                 const headerCell = document.createElement('div');
                 headerCell.className = 'header-cell capability-header';
@@ -1308,27 +1214,21 @@
                 heatmap.appendChild(headerCell);
             });
 
-            // Filter tools based on selection
             let filteredTools = [];
             
-            // Check if "Not detected" is selected
             if (showUnusedTools) {
-                // Get tools with no usage in any region
                 const unusedTools = toolsData.filter(row => {
                     return regionColumns.every(region => !row[region] || row[region] === 0 || row[region] === '0');
                 });
                 filteredTools = filteredTools.concat(unusedTools);
             }
             
-            // Check for regular region selections
             if (selectedRegions.length > 0) {
                 const regionalTools = toolsData.filter(row => 
                     selectedRegions.some(region => row[region] === 1 || row[region] === '1')
                 );
                 
-                // Combine with unused tools if both are selected
                 if (showUnusedTools) {
-                    // Avoid duplicates by filtering
                     regionalTools.forEach(tool => {
                         if (!filteredTools.some(t => t.Tool === tool.Tool)) {
                             filteredTools.push(tool);
@@ -1339,24 +1239,15 @@
                 }
             }
             
-            // Sort tools alphabetically
             filteredTools.sort((a, b) => a.Tool.localeCompare(b.Tool));
 
-            // Debug info
-            let debugInfo = {
-                totalPending: 0,
-                pendingDetails: []
-            };
-
             if (filteredTools.length === 0) {
-                // No tools selected, but headers are still shown
                 heatmap.classList.add('headers-only');
                 const noDataMsg = document.createElement('div');
                 noDataMsg.className = 'no-data-message';
                 noDataMsg.innerHTML = '<strong>No tools selected</strong><br>Select one or more regions above to view tools, or click on capability headers to explore subcapabilities.';
                 heatmap.appendChild(noDataMsg);
                 
-                // Update stats for no tools
                 document.getElementById('tools-count').textContent = '0';
                 document.getElementById('capabilities-count').textContent = capabilities.length;
                 document.getElementById('pending-count').textContent = '0';
@@ -1367,16 +1258,13 @@
 
             heatmap.classList.remove('headers-only');
 
-            // Tool rows
             filteredTools.forEach(toolRow => {
-                // Tool name cell
                 const toolCell = document.createElement('div');
                 toolCell.className = 'tool-cell';
                 toolCell.textContent = toolRow.Tool;
                 toolCell.addEventListener('click', () => showToolModal(toolRow));
                 heatmap.appendChild(toolCell);
 
-                // TIME Status cell
                 const timeStatusCell = document.createElement('div');
                 timeStatusCell.className = 'time-status-cell';
                 const timeStatus = toolRow['TIME Status'] || '';
@@ -1410,30 +1298,17 @@
                 
                 heatmap.appendChild(timeStatusCell);
 
-                // Capability cells with confidence support
                 capabilities.forEach((capability, capIndex) => {
                     const capColumnName = `Cap${capIndex + 1}`;
                     const cellValue = toolRow[capColumnName];
                     
-                    // Parse score and confidence
                     const { score, confidence } = parseScoreAndConfidence(cellValue);
-
-                    // Debug pending detection
-                    if (score === -1) {
-                        debugInfo.totalPending++;
-                        debugInfo.pendingDetails.push({
-                            tool: toolRow.Tool,
-                            capability: capability,
-                            value: cellValue
-                        });
-                    }
 
                     const cell = document.createElement('div');
                     cell.className = 'capability-cell';
                     cell.dataset.confidence = confidence;
                     cell.dataset.score = score;
 
-                    // Apply score styling
                     switch(score) {
                         case 3:
                             cell.classList.add('primary-cell');
@@ -1460,24 +1335,7 @@
                 });
             });
 
-            // Show debug info if enabled
-            if (debugMode) {
-                const debugDiv = document.getElementById('debug-info');
-                const debugContent = document.getElementById('debug-content');
-                debugContent.innerHTML = `
-                    <p>Total pending found: ${debugInfo.totalPending}</p>
-                    ${debugInfo.pendingDetails.slice(0, 5).map(d => 
-                        `<p style="font-size: 10px;">${d.tool} - ${d.capability}: "${d.value}"</p>`
-                    ).join('')}
-                    ${debugInfo.totalPending > 5 ? '<p>...and more</p>' : ''}
-                `;
-                debugDiv.classList.add('show');
-            }
-
-            // Apply filters
             applyAllFilters();
-
-            // Update stats
             updateStats(filteredTools);
         }
 
@@ -1493,22 +1351,17 @@
                 const confidence = cell.dataset.confidence;
                 const score = parseInt(cell.dataset.score);
                 
-                // Reset styles
                 cell.style.opacity = '';
                 cell.style.visibility = '';
                 cell.dataset.confidenceHidden = 'false';
-                const originalText = getOriginalText(score);
                 
-                // For cells with no score (0), treat them as low confidence if "Weak or no data" is not selected
                 if (score === 0) {
                     if (!selectedConfidenceLevels.includes('L')) {
                         cell.dataset.confidenceHidden = 'true';
                     }
                 } else if (score === -1) {
-                    // Pending cells are always shown regardless of confidence filter
                     cell.dataset.confidenceHidden = 'false';
                 } else {
-                    // For cells with scores, check if their confidence level is selected
                     if (!selectedConfidenceLevels.includes(confidence)) {
                         cell.dataset.confidenceHidden = 'true';
                     }
@@ -1524,34 +1377,31 @@
                 const confidenceHidden = cell.dataset.confidenceHidden === 'true';
                 const originalText = getOriginalText(score);
                 
-                // Apply contrast filter based on score
                 let contrastHidden = false;
                 switch(contrastLevel) {
-                    case 0: // P only
+                    case 0:
                         contrastHidden = score !== 3;
                         break;
-                    case 1: // P & S
+                    case 1:
                         contrastHidden = score < 2;
                         break;
-                    case 2: // P, S & T
+                    case 2:
                         contrastHidden = score < 1;
                         break;
-                    case 3: // All except pending
+                    case 3:
                         contrastHidden = score === -1;
                         break;
-                    case 4: // All including pending
+                    case 4:
                     default:
                         contrastHidden = false;
                         break;
                 }
                 
-                // Apply combined filter effect
                 if (confidenceHidden || contrastHidden) {
                     cell.style.opacity = '0.1';
                     cell.textContent = '';
                 } else {
                     cell.style.opacity = '';
-                    // Keep consistent display format
                     if (score === -1) {
                         cell.textContent = 'Pending';
                     } else {
@@ -1571,7 +1421,6 @@
             }
         }
 
-        // NEW FUNCTION: Show static TIME Status modal
         function showTimeStatusModal() {
             const modal = document.getElementById('capabilityModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -1587,7 +1436,7 @@
                         <div>
                             <div class="time-status-label">INVEST</div>
                             <div class="time-status-description">
-                                Applications with both high technical and functional fit. These are mission-critical systems that deliver substantial business value and warrant continued enhancement and resource allocation to support strategic objectives. Investment should focus on expanding capabilities, improving performance, and ensuring scalability.
+                                Applications with both high technical and functional fit. These are mission-critical systems that deliver substantial business value and warrant continued enhancement and resource allocation to support strategic objectives.
                             </div>
                         </div>
                     </div>
@@ -1596,7 +1445,7 @@
                         <div>
                             <div class="time-status-label">TOLERATE</div>
                             <div class="time-status-description">
-                                Applications with high technical fit but low functional value. These systems work adequately but don't significantly contribute to business goals. Maintain them in their current state without additional investment until a compelling business case emerges for change. Minimize costs while ensuring operational stability.
+                                Applications with high technical fit but low functional value. These systems work adequately but don't significantly contribute to business goals. Maintain them in their current state without additional investment.
                             </div>
                         </div>
                     </div>
@@ -1605,7 +1454,7 @@
                         <div>
                             <div class="time-status-label">MIGRATE</div>
                             <div class="time-status-description">
-                                Applications with low technical fit but high functional value. While important for business operations, these systems suffer from technical debt, obsolete architecture, or compatibility issues. Plan to re-architect or replace them with modern alternatives that better align with current technology standards.
+                                Applications with low technical fit but high functional value. While important for business operations, these systems suffer from technical debt or obsolete architecture.
                             </div>
                         </div>
                     </div>
@@ -1614,22 +1463,14 @@
                         <div>
                             <div class="time-status-label">ELIMINATE</div>
                             <div class="time-status-description">
-                                Applications with both low technical and functional fit. These redundant, obsolete, or underperforming systems should be decommissioned to reduce costs and complexity. Develop a sunset plan to migrate users and data to alternative solutions before retirement.
+                                Applications with both low technical and functional fit. These redundant or underperforming systems should be decommissioned to reduce costs and complexity.
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div style="margin-top: 25px; padding: 15px; background: #f0f7ff; border-radius: 8px; border: 1px solid #0079FF;">
-                    <p style="color: #001c66; font-size: 0.95em; line-height: 1.6; margin: 0;">
-                        <strong>About the TIME Methodology:</strong> The Gartner TIME framework is a strategic approach for Application Portfolio Management that helps organizations maximize business value by evaluating applications based on their technical condition and functional alignment with business objectives.
-                    </p>
-                </div>
             `;
             
             modalContent.innerHTML = timeContent;
-            
-            // Scroll modal content to top when opening
             modalContent.scrollTop = 0;
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -1639,7 +1480,6 @@
             document.getElementById('tools-count').textContent = filteredTools.length;
             document.getElementById('capabilities-count').textContent = capabilities.length;
             
-            // Count pending evaluations
             let pendingCount = 0;
             filteredTools.forEach(row => {
                 for (let i = 1; i <= capabilities.length; i++) {
@@ -1650,7 +1490,6 @@
             });
             document.getElementById('pending-count').textContent = pendingCount;
             
-            // Count high potential tools (those with 3+ primary capabilities)
             const highPotentialCount = filteredTools.filter(row => {
                 let highScores = 0;
                 for (let i = 1; i <= capabilities.length; i++) {
@@ -1674,7 +1513,6 @@
         }
 
         function setupEventListeners() {
-            // Region filter event listeners
             document.querySelectorAll('.region-checkbox input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', handleRegionChange);
             });
@@ -1693,7 +1531,6 @@
                 updateHeatmap();
             });
 
-            // Confidence filter event listeners
             document.querySelectorAll('.confidence-checkbox input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', handleConfidenceChange);
             });
@@ -1710,19 +1547,16 @@
                 applyAllFilters();
             });
 
-            // Contrast slider event listeners - updated range
             const contrastSlider = document.getElementById('contrastSlider');
             contrastSlider.addEventListener('input', (e) => {
                 contrastLevel = parseInt(e.target.value);
                 applyContrastFilter();
             });
 
-            // Refresh button
             document.getElementById('refresh-btn').addEventListener('click', () => {
                 loadDataFromGitHub();
             });
 
-            // Modal event listeners
             document.getElementById('modalClose').addEventListener('click', closeModal);
             
             document.getElementById('capabilityModal').addEventListener('click', function(e) {
@@ -1897,25 +1731,25 @@
             const descriptionDiv = document.createElement('div');
             descriptionDiv.style.padding = '0';
             descriptionDiv.innerHTML = `
-                <div style="margin-bottom: 20px; line-height: 1.6; color: #2c3e50; font-size: 1em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                <div style="margin-bottom: 20px; line-height: 1.6; color: #2c3e50; font-size: 1em;">
                     ${toolData.Description || 'No description available'}
                 </div>
                 <div style="margin-bottom: 15px;">
                     <div style="margin-bottom: 10px;">
-                        <strong style="color: #495057; font-size: 0.95em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">TIME Status:</strong>
-                        <div style="margin-top: 4px; padding: 8px 12px; background: ${timeStatusBg}; color: ${timeStatusColor}; border-radius: 4px; border: 1px solid #e9ecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1em; font-weight: 600; display: inline-block;">
+                        <strong style="color: #495057; font-size: 0.95em;">TIME Status:</strong>
+                        <div style="margin-top: 4px; padding: 8px 12px; background: ${timeStatusBg}; color: ${timeStatusColor}; border-radius: 4px; border: 1px solid #e9ecef; font-size: 1em; font-weight: 600; display: inline-block;">
                             ${timeStatus === 'tbd' ? 'TBD' : timeStatus}
                         </div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <strong style="color: #495057; font-size: 0.95em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Primary SysAdmin:</strong>
-                        <div style="margin-top: 4px; padding: 8px 12px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1em;">
+                        <strong style="color: #495057; font-size: 0.95em;">Primary SysAdmin:</strong>
+                        <div style="margin-top: 4px; padding: 8px 12px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef; font-size: 1em;">
                             ${toolData['Primary SysAdmin'] || 'Not specified'}
                         </div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <strong style="color: #495057; font-size: 0.95em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Budget holder(s):</strong>
-                        <div style="margin-top: 4px; padding: 8px 12px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1em;">
+                        <strong style="color: #495057; font-size: 0.95em;">Budget holder(s):</strong>
+                        <div style="margin-top: 4px; padding: 8px 12px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef; font-size: 1em;">
                             ${toolData['Budget Holder(s)'] || 'Not specified'}
                         </div>
                     </div>
@@ -1929,7 +1763,6 @@
                         text-decoration: none;
                         border-radius: 6px;
                         font-weight: 600;
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                         transition: all 0.3s ease;
                     " onmouseover="this.style.background='linear-gradient(135deg, #5a6fd8, #6a42a0)'" 
                        onmouseout="this.style.background='linear-gradient(135deg, #667eea, #764ba2)'">
@@ -1951,7 +1784,6 @@
             document.body.style.overflow = '';
         }
 
-        // Load data when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadDataFromGitHub();
         });
