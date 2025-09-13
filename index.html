@@ -393,7 +393,8 @@
             position: sticky;
             left: 0;
             z-index: 15;
-            background: #001c66;
+            background: #D7DDE8;
+            color: #001C66;
         }
 
         .time-header-cell {
@@ -422,7 +423,7 @@
         }
 
         .header-cell.corner-cell:hover {
-            background: #001c66;
+            background: #D7DDE8;
             cursor: default;
         }
 
@@ -612,6 +613,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .modal-header.time-modal-header {
+            background: #AD5321;
         }
 
         .modal-title {
@@ -935,7 +940,7 @@
 
     <div class="modal-overlay" id="capabilityModal">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" id="modalHeader">
                 <h3 class="modal-title" id="modalTitle">Capability Details</h3>
                 <button class="modal-close" id="modalClose">×</button>
             </div>
@@ -1416,8 +1421,12 @@
 
         function showTimeStatusModal() {
             const modal = document.getElementById('capabilityModal');
+            const modalHeader = document.getElementById('modalHeader');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
+            
+            // Add special class for TIME modal
+            modalHeader.classList.add('time-modal-header');
             
             modalTitle.textContent = 'Gartner TIME Methodology';
             modalContent.innerHTML = '';
@@ -1641,8 +1650,12 @@
 
         function showCapabilityModal(capabilityIndex, capabilityName) {
             const modal = document.getElementById('capabilityModal');
+            const modalHeader = document.getElementById('modalHeader');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
+            
+            // Remove TIME modal class if present
+            modalHeader.classList.remove('time-modal-header');
             
             modalTitle.textContent = `${capabilityIndex}. ${capabilityName}`;
             modalContent.innerHTML = '';
@@ -1687,8 +1700,12 @@
 
         function showToolModal(toolData) {
             const modal = document.getElementById('capabilityModal');
+            const modalHeader = document.getElementById('modalHeader');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
+            
+            // Remove TIME modal class if present
+            modalHeader.classList.remove('time-modal-header');
             
             modalTitle.textContent = toolData.Tool;
             modalContent.innerHTML = '';
@@ -1773,6 +1790,11 @@
 
         function closeModal() {
             const modal = document.getElementById('capabilityModal');
+            const modalHeader = document.getElementById('modalHeader');
+            
+            // Remove TIME modal class when closing
+            modalHeader.classList.remove('time-modal-header');
+            
             modal.classList.remove('show');
             document.body.style.overflow = '';
         }
