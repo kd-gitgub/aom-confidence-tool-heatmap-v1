@@ -245,7 +245,7 @@
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin: 15px 0;
         }
@@ -861,23 +861,19 @@
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number" id="tools-count">0</div>
-                <div class="stat-label">Total Tools Analysed</div>
+                <div class="stat-label">Total tools discovered</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="capabilities-count">0</div>
-                <div class="stat-label">Level 2 Capabilities</div>
+                <div class="stat-label">D&A Business Capabilities</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="pending-count">0</div>
-                <div class="stat-label">Pending Evaluations</div>
+                <div class="stat-number" id="evaluations-count">0</div>
+                <div class="stat-label">Evaluations undertaken</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="high-potential-count">0</div>
                 <div class="stat-label">High Rationalisation Potential</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="reduction-potential">0%</div>
-                <div class="stat-label">Potential Tool Reduction</div>
             </div>
         </div>
 
@@ -1257,9 +1253,8 @@
                 
                 document.getElementById('tools-count').textContent = '0';
                 document.getElementById('capabilities-count').textContent = capabilities.length;
-                document.getElementById('pending-count').textContent = '0';
+                document.getElementById('evaluations-count').textContent = '0';
                 document.getElementById('high-potential-count').textContent = '0';
-                document.getElementById('reduction-potential').textContent = '0%';
                 return;
             }
 
@@ -1515,15 +1510,15 @@
             document.getElementById('tools-count').textContent = filteredTools.length;
             document.getElementById('capabilities-count').textContent = capabilities.length;
             
-            let pendingCount = 0;
+            let evaluationsCount = 0;
             filteredTools.forEach(row => {
                 for (let i = 1; i <= capabilities.length; i++) {
                     const cellValue = row[`Cap${i}`];
                     const { score } = parseScoreAndConfidence(cellValue);
-                    if (score === -1) pendingCount++;
+                    if (score !== -1) evaluationsCount++;
                 }
             });
-            document.getElementById('pending-count').textContent = pendingCount;
+            document.getElementById('evaluations-count').textContent = evaluationsCount;
             
             const highPotentialCount = filteredTools.filter(row => {
                 let highScores = 0;
@@ -1536,15 +1531,6 @@
             }).length;
             
             document.getElementById('high-potential-count').textContent = highPotentialCount;
-            
-            const totalTools = filteredTools.length;
-            if (totalTools > 0) {
-                const reductionPercentage = Math.round((highPotentialCount / totalTools) * 100);
-                const reductionRange = `${Math.max(reductionPercentage - 5, 0)}-${Math.min(reductionPercentage + 10, 100)}%`;
-                document.getElementById('reduction-potential').textContent = reductionRange;
-            } else {
-                document.getElementById('reduction-potential').textContent = '0%';
-            }
         }
 
         function setupEventListeners() {
