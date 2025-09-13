@@ -1434,11 +1434,15 @@
             
             const timeContent = `
                 <div class="time-status-section">
+                    <div style="padding: 0 25px 20px; color: #495057; line-height: 1.6; font-size: 0.95em;">
+                        The Gartner TIME methodology is framework for evaluating and managing application & tool portfolios based on two key dimensions: technical fit and functional/business value. TIME categorises applications into four categories:
+                    </div>
+                    
                     <div class="time-status-item invest">
                         <div>
                             <div class="time-status-label">INVEST</div>
                             <div class="time-status-description">
-                                Applications with both high technical and functional fit. These are mission-critical systems that deliver substantial business value and warrant continued enhancement and resource allocation to support strategic objectives.
+                                tools & applications demonstrate both high technical quality and strong functional value. These mission-critical tools warrant continued enhancement and resource allocation as they directly support our business objectives.
                             </div>
                         </div>
                     </div>
@@ -1447,7 +1451,7 @@
                         <div>
                             <div class="time-status-label">TOLERATE</div>
                             <div class="time-status-description">
-                                Applications with high technical fit but low functional value. These systems work adequately but don't significantly contribute to business goals. Maintain them in their current state without additional investment.
+                                analytics tools have solid technical foundations but deliver limited business value. These tools should be maintained in their current state without additional investment, operating adequately but not significantly contributing to business goals.
                             </div>
                         </div>
                     </div>
@@ -1456,7 +1460,7 @@
                         <div>
                             <div class="time-status-label">MIGRATE</div>
                             <div class="time-status-description">
-                                Applications with low technical fit but high functional value. While important for business operations, these systems suffer from technical debt or obsolete architecture.
+                                tools provide high functional value but suffer from poor technical fit due to obsolete architecture or technical debt. These require modernisation or replacement to maintain their business benefits while improving technical sustainability.
                             </div>
                         </div>
                     </div>
@@ -1465,9 +1469,29 @@
                         <div>
                             <div class="time-status-label">ELIMINATE</div>
                             <div class="time-status-description">
-                                Applications with both low technical and functional fit. These redundant or underperforming systems should be decommissioned to reduce costs and complexity.
+                                analytics tools score low on both technical and functional dimensions. These redundant or underperforming systems should be decommissioned to reduce operational costs and organisational complexity.
                             </div>
                         </div>
+                    </div>
+                    
+                    <div style="padding: 20px 25px; color: #495057; line-height: 1.6; font-size: 0.95em;">
+                        This framework helps us make data-driven decisions about resource allocation, tool modernisation priorities, and tool consolidation strategies.
+                    </div>
+                    
+                    <div style="padding: 0 25px 25px; text-align: center;">
+                        <a href="https://www.leanix.net/en/wiki/apm/gartner-time-model" target="_blank" style="
+                            display: inline-block;
+                            padding: 10px 20px;
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.background='linear-gradient(135deg, #5a6fd8, #6a42a0)'" 
+                           onmouseout="this.style.background='linear-gradient(135deg, #667eea, #764ba2)'">
+                            Learn more about TIME methodology →
+                        </a>
                     </div>
                 </div>
             `;
