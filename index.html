@@ -280,6 +280,15 @@
             border: 1px solid #dee2e6;
         }
 
+        .legend-label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #001c66;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
         .legend-item {
             display: flex;
             align-items: center;
@@ -903,6 +912,7 @@
         </div>
 
         <div class="legend">
+            <div class="legend-label">Tool functional fit:</div>
             <div class="legend-item">
                 <div class="legend-color primary"></div>
                 <span>Primary (core purpose)</span>
@@ -1193,8 +1203,7 @@
             cornerCell.textContent = 'ANALYTICS TOOLS';
             cornerCell.style.fontSize = '14px';
             cornerCell.style.fontWeight = 'bold';
-            cornerCell.style.justifyContent = 'flex-end';
-            cornerCell.style.paddingRight = '25px';
+            cornerCell.style.justifyContent = 'center';
             heatmap.appendChild(cornerCell);
 
             const timeHeaderCell = document.createElement('div');
