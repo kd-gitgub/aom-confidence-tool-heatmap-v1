@@ -1245,14 +1245,23 @@
             // First filter by regions
             if (showUnusedTools) {
                 const unusedTools = toolsData.filter(row => {
-                    return regionColumns.every(region => !row[region] || row[region] === 0 || row[region] === '0');
+                    return regionColumns.every(region => {
+                        const value = row[region];
+                        // Check if the value is empty, null, zero, or falsy
+                        return !value || value === 0 || value === '0' || value === '' || value === null;
+                    });
                 });
                 filteredTools = filteredTools.concat(unusedTools);
             }
             
             if (selectedRegions.length > 0) {
                 const regionalTools = toolsData.filter(row => 
-                    selectedRegions.some(region => row[region] === 1 || row[region] === '1')
+                    selectedRegions.some(region => {
+                        const value = row[region];
+                        // More flexible check for truthy values
+                        // Accept 1, 1.0, '1', '1.0', or any truthy number
+                        return value && (value == 1 || parseFloat(value) === 1);
+                    })
                 );
                 
                 if (showUnusedTools) {
