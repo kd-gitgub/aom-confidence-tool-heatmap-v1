@@ -1159,6 +1159,11 @@
         function parseScoreAndConfidence(cellValue) {
             const value = String(cellValue || '').trim();
             
+            // Debug logging - remove after testing
+            if (value && value.includes('H')) {
+                console.log('Found H value:', value, 'Length:', value.length, 'Chars:', value.split('').map(c => c.charCodeAt(0)));
+            }
+            
             let score = 0;
             let confidence = '';
             
