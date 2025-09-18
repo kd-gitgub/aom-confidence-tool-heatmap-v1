@@ -562,7 +562,7 @@
 
         .primary-cell {
             background: #8f29fc !important;
-            color: white;
+            color: white !important;
             font-weight: bold;
         }
 
@@ -579,10 +579,11 @@
 
         .pending-cell {
             background: white !important;
-            color: #001C66 !important;
+            color: #D3CAD9 !important;
             font-weight: normal !important;
             font-style: normal !important;
             border: 1px solid #e1e8ed;
+            font-size: 10px !important;
         }
 
         .none-cell {
@@ -967,7 +968,7 @@
             </div>
             <div class="legend-item">
                 <div class="legend-color pending"></div>
-                <span>Not evaluated yet</span>
+                <span>No evaluation yet</span>
             </div>
         </div>
 
@@ -1401,7 +1402,7 @@
                             break;
                         case -1:
                             cell.classList.add('pending-cell');
-                            cell.textContent = 'Not evaluated yet';
+                            cell.textContent = 'No evaluation yet';
                             break;
                         default:
                             cell.classList.add('none-cell');
@@ -1480,7 +1481,7 @@
                 } else {
                     cell.style.opacity = '';
                     if (score === -1) {
-                        cell.textContent = 'Not evaluated yet';
+                        cell.textContent = 'No evaluation yet';
                     } else {
                         cell.textContent = originalText;
                     }
@@ -1493,7 +1494,7 @@
                 case 3: return 'Primary';
                 case 2: return 'Secondary';
                 case 1: return 'Tertiary';
-                case -1: return 'Not evaluated yet';
+                case -1: return 'No evaluation yet';
                 default: return 'No capability';
             }
         }
