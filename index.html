@@ -875,8 +875,8 @@
                     <input type="checkbox" id="gac" value="GAC" checked>
                     <span>GAC</span>
                 </label>
-                <label class="region-checkbox" id="usage-not-detected-label">
-                    <input type="checkbox" id="usage-not-detected" value="USAGE_NOT_DETECTED">
+                <label class="region-checkbox selected" id="usage-not-detected-label">
+                    <input type="checkbox" id="usage-not-detected" value="USAGE_NOT_DETECTED" checked>
                     <span>Not detected</span>
                 </label>
                 <div class="filter-actions">
@@ -1011,7 +1011,7 @@
         let capabilities = [];
         let selectedRegions = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
-        let showUnusedTools = false;
+        let showUnusedTools = true;
         let selectedConfidenceLevels = ['H', 'M', 'L'];
         let selectedCommercialStatus = ['Commercial', 'Open-source'];
         let contrastLevel = 4;
