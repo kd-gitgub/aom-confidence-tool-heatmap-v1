@@ -1401,7 +1401,7 @@
                             break;
                         case -1:
                             cell.classList.add('pending-cell');
-                            cell.textContent = 'No evaluation';
+                            cell.textContent = 'Not evaluated yet';
                             break;
                         default:
                             cell.classList.add('none-cell');
@@ -1480,7 +1480,7 @@
                 } else {
                     cell.style.opacity = '';
                     if (score === -1) {
-                        cell.textContent = 'No evaluation';
+                        cell.textContent = 'Not evaluated yet';
                     } else {
                         cell.textContent = originalText;
                     }
@@ -1493,7 +1493,7 @@
                 case 3: return 'Primary';
                 case 2: return 'Secondary';
                 case 1: return 'Tertiary';
-                case -1: return 'No evaluation';
+                case -1: return 'Not evaluated yet';
                 default: return 'No capability';
             }
         }
