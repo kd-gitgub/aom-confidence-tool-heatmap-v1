@@ -173,7 +173,7 @@
             display: flex;
             gap: 8px;
             align-items: center;
-            margin: 0 12px;
+            margin-left: auto;
             padding-left: 12px;
             border-left: 1px solid #dadce0;
         }
@@ -182,12 +182,14 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-left: auto;
             padding: 4px 6px;
             background: white;
             border-radius: 3px;
             border: 1px solid #dadce0;
             height: 26px;
+            margin-right: 12px;
+            border-right: 1px solid #dadce0;
+            padding-right: 12px;
         }
 
         .contrast-slider-label {
@@ -853,8 +855,8 @@
                     <span>AMETA D&A</span>
                 </label>
                 <label class="region-checkbox selected" id="brix-label">
-                    <input type="checkbox" id="brix" value="BRIX" checked>
-                    <span>BRIX</span>
+                    <input type="checkbox" id="brix" value="DIGITAL BRIX" checked>
+                    <span>DIGITAL BRIX</span>
                 </label>
                 <label class="region-checkbox selected" id="digital-da-label">
                     <input type="checkbox" id="digital-da" value="DIGITAL D&A" checked>
@@ -896,29 +898,31 @@
 
         <div class="confidence-filter">
             <div class="filter-controls">
-                <label class="confidence-checkbox selected" id="conf-high-label">
-                    <input type="checkbox" id="conf-high" value="H" checked>
-                    <span>High Confidence</span>
-                </label>
-                <label class="confidence-checkbox selected" id="conf-medium-label">
-                    <input type="checkbox" id="conf-medium" value="M" checked>
-                    <span>Medium Confidence</span>
-                </label>
-                <label class="confidence-checkbox selected" id="conf-low-label">
-                    <input type="checkbox" id="conf-low" value="L" checked>
-                    <span>Weak or no data</span>
-                </label>
-                <div class="filter-actions">
-                    <button class="filter-btn" id="conf-select-all">Select All</button>
-                    <button class="filter-btn" id="conf-clear-all">Clear All</button>
-                </div>
-                
                 <div class="contrast-slider-container">
                     <label class="contrast-slider-label">Contrast:</label>
                     <div class="slider-wrapper">
                         <span class="slider-side-label">High</span>
                         <input type="range" min="0" max="4" value="4" class="contrast-slider" id="contrastSlider">
                         <span class="slider-side-label">Low</span>
+                    </div>
+                </div>
+                
+                <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+                    <label class="confidence-checkbox selected" id="conf-high-label">
+                        <input type="checkbox" id="conf-high" value="H" checked>
+                        <span>High Confidence</span>
+                    </label>
+                    <label class="confidence-checkbox selected" id="conf-medium-label">
+                        <input type="checkbox" id="conf-medium" value="M" checked>
+                        <span>Medium Confidence</span>
+                    </label>
+                    <label class="confidence-checkbox selected" id="conf-low-label">
+                        <input type="checkbox" id="conf-low" value="L" checked>
+                        <span>Weak or no data</span>
+                    </label>
+                    <div class="filter-actions">
+                        <button class="filter-btn" id="conf-select-all">Select All</button>
+                        <button class="filter-btn" id="conf-clear-all">Clear All</button>
                     </div>
                 </div>
             </div>
@@ -1004,8 +1008,8 @@
         let toolsData = null;
         let subcapabilitiesData = {};
         let capabilities = [];
-        let selectedRegions = ['AMERICAS D&A', 'AMETA D&A', 'BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
-        let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
+        let selectedRegions = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
+        let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let showUnusedTools = false;
         let selectedConfidenceLevels = ['H', 'M', 'L'];
         let selectedCommercialStatus = ['Commercial', 'Open-source'];
@@ -1073,7 +1077,7 @@
                 });
 
             capabilities = capColumns.map(col => capabilityNamesRow[col] || `Capability ${col.replace('Cap', '')}`);
-            regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
+            regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
 
             toolsData = toolRows;
         }
