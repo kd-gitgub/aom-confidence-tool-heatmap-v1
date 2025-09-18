@@ -132,9 +132,19 @@
             cursor: pointer;
         }
 
+        .commercial-checkbox.selected input[type="checkbox"] {
+            accent-color: #0A142D;
+        }
+
         .region-checkbox.selected, .confidence-checkbox.selected, .commercial-checkbox.selected {
             border-color: #0079FF;
             background: #0079FF;
+            color: white;
+        }
+
+        .commercial-checkbox.selected {
+            border-color: #0A142D;
+            background: #0A142D;
             color: white;
         }
 
@@ -870,6 +880,17 @@
                     <button class="filter-btn" id="select-all">Select All</button>
                     <button class="filter-btn" id="clear-all">Clear All</button>
                 </div>
+                
+                <div class="commercial-filter-group">
+                    <label class="commercial-checkbox selected" id="commercial-label">
+                        <input type="checkbox" id="commercial" value="Commercial" checked>
+                        <span>Commercial</span>
+                    </label>
+                    <label class="commercial-checkbox selected" id="open-source-label">
+                        <input type="checkbox" id="open-source" value="Open-source" checked>
+                        <span>Open-source</span>
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -890,17 +911,6 @@
                 <div class="filter-actions">
                     <button class="filter-btn" id="conf-select-all">Select All</button>
                     <button class="filter-btn" id="conf-clear-all">Clear All</button>
-                </div>
-                
-                <div class="commercial-filter-group">
-                    <label class="commercial-checkbox selected" id="commercial-label">
-                        <input type="checkbox" id="commercial" value="Commercial" checked>
-                        <span>Commercial</span>
-                    </label>
-                    <label class="commercial-checkbox selected" id="open-source-label">
-                        <input type="checkbox" id="open-source" value="Open-source" checked>
-                        <span>Open-source</span>
-                    </label>
                 </div>
                 
                 <div class="contrast-slider-container">
