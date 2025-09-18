@@ -842,6 +842,10 @@
                     <input type="checkbox" id="ameta-da" value="AMETA D&A" checked>
                     <span>AMETA D&A</span>
                 </label>
+                <label class="region-checkbox selected" id="brix-label">
+                    <input type="checkbox" id="brix" value="BRIX" checked>
+                    <span>BRIX</span>
+                </label>
                 <label class="region-checkbox selected" id="digital-da-label">
                     <input type="checkbox" id="digital-da" value="DIGITAL D&A" checked>
                     <span>DIGITAL D&A</span>
@@ -990,8 +994,8 @@
         let toolsData = null;
         let subcapabilitiesData = {};
         let capabilities = [];
-        let selectedRegions = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
-        let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
+        let selectedRegions = ['AMERICAS D&A', 'AMETA D&A', 'BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
+        let regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
         let showUnusedTools = false;
         let selectedConfidenceLevels = ['H', 'M', 'L'];
         let selectedCommercialStatus = ['Commercial', 'Open-source'];
@@ -1059,7 +1063,7 @@
                 });
 
             capabilities = capColumns.map(col => capabilityNamesRow[col] || `Capability ${col.replace('Cap', '')}`);
-            regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
+            regionColumns = ['AMERICAS D&A', 'AMETA D&A', 'BRIX', 'DIGITAL D&A', 'EUROPE D&A', 'ERA', 'GAC'];
 
             toolsData = toolRows;
         }
