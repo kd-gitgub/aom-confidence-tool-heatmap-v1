@@ -953,7 +953,7 @@
             </div>
             <div class="legend-item">
                 <div class="legend-color pending"></div>
-                <span>Pending (not yet evaluated)</span>
+                <span>Not evaluated yet</span>
             </div>
         </div>
 
@@ -1382,7 +1382,7 @@
                             break;
                         case -1:
                             cell.classList.add('pending-cell');
-                            cell.textContent = 'Pending';
+                            cell.textContent = 'No evaluation';
                             break;
                         default:
                             cell.classList.add('none-cell');
@@ -1461,7 +1461,7 @@
                 } else {
                     cell.style.opacity = '';
                     if (score === -1) {
-                        cell.textContent = 'Pending';
+                        cell.textContent = 'No evaluation';
                     } else {
                         cell.textContent = originalText;
                     }
@@ -1474,7 +1474,7 @@
                 case 3: return 'Primary';
                 case 2: return 'Secondary';
                 case 1: return 'Tertiary';
-                case -1: return 'Pending';
+                case -1: return 'No evaluation';
                 default: return 'No capability';
             }
         }
