@@ -1267,12 +1267,23 @@
             }
             
             // Then filter by commercial status
-            if (selectedCommercialStatus.length > 0) {
+            if (selectedCommercialStatus.length === 1) {
+                // If only one status is selected, filter by it
                 filteredTools = filteredTools.filter(row => {
-                    const commercialStatus = row['Commercial Status'] || '';
-                    return selectedCommercialStatus.includes(commercialStatus);
+                    const commercialStatus = (row['Commercial Status'] || '').trim().toLowerCase();
+                    
+                    // Handle different variations of commercial and open-source
+                    let normalizedStatus = '';
+                    if (commercialStatus.includes('commercial')) {
+                        normalizedStatus = 'Commercial';
+                    } else if (commercialStatus.includes('open') || commercialStatus.includes('source')) {
+                        normalizedStatus = 'Open-source';
+                    }
+                    
+                    return selectedCommercialStatus.includes(normalizedStatus);
                 });
             }
+            // If both are selected or none are selected, show all tools (no additional filtering)
             
             filteredTools.sort((a, b) => a.Tool.localeCompare(b.Tool));
 
